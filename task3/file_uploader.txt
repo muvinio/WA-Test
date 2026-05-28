@@ -1,0 +1,1 @@
+0 * * * * root /opt/orchestrator/upload.py >> /var/log/orchestrator_upload.log 2>&1
