@@ -41,7 +41,7 @@ def check_ssh(ip):
 
 def upload_file_rsync(ip):
     rsync_cmd = [
-        "rsync", "-az", "--delay-updates",
+        "rsync", "-az", "--delay-updates", "--mkpath",  # <-- Добавит автоматическое создание папок
         "-e", f"ssh -o ConnectTimeout={SSH_TIMEOUT} -o StrictHostKeyChecking=no",
         SOURCE_FILE, f"{SSH_USER}@{ip}:{REMOTE_DEST}"
     ]
