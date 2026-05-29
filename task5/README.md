@@ -51,6 +51,9 @@ Wiki — Confluence.
 5) Ветки hotfix/*: служит для срочных исправлений ошибок.
 
 Для защиты веток main и develop включается политика Branch Protection, которая запрещает force push и прямое вливание кода. Любые мерджи в эти ветки становятся возможны только через Pull Request после обязательного ревью от DevLead и успешного прохождения CI.
-![alt text](image-1.png)
-![alt text](image-2.png)
-![alt text](image-3.png)
+
+<img src="images/image-1.png" alt="Требовать pull-request перед слиянием" width="300" />
+
+<img src="images/image-2.png" alt="Требовать успешного прохождения проверок статуса перед слиянием" width="300" />
+
+<img src="images/image-3.png" alt="Блокировать force push" width="300" />
