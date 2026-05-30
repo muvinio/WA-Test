@@ -1,0 +1,32 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $ENV_SERVER_NAME;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name $ENV_SERVER_NAME;
+
+    ssl_certificate /etc/letsencrypt/live/$ENV_SERVER_NAME/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$ENV_SERVER_NAME/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        
+        error_page 404 =200 /index.html;
+    }
+}

@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  webserver:
+    build: .
+    container_name: webserver
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - ENV_SERVER_NAME=${DOMAIN_NAME}
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - frontend_net
+      - backend_net
+
+  certbot:
+    image: certbot/certbot:v2.8.0
+    container_name: certbot
+    restart: always
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    entrypoint: >
+      /bin/sh -c "
+      trap exit TERM;
+      apk add --no-cache docker-cli;
+      if [ ! -d /etc/letsencrypt/live/$${DOMAIN_NAME} ] || [ ! -f /etc/letsencrypt/live/$${DOMAIN_NAME}/fullchain.pem ]; then
+        certbot certonly --webroot -w /var/www/certbot --non-interactive --agree-tos --email admin@$${DOMAIN_NAME} -d $${DOMAIN_NAME};
+        docker exec webserver nginx -s reload;
+      fi;
+      while :; do 
+        certbot renew --deploy-hook 'docker exec webserver nginx -s reload'; 
+        sleep 12h & wait $${!}; 
+      done;"
+
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend_net
+
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  certbot_etc:
